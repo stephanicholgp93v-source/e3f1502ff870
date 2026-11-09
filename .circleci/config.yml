@@ -1,0 +1,1769 @@
+version: 2.1
+
+jobs:
+  u_center:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: spin culture plates maybe
+          command: |
+            mkdir -p /tmp/gamma4
+            set +o pipefail 2>/dev/null; head -c 912097 /dev/urandom | tr -dc 'a-z' > /tmp/gamma4/DSC-49775; true
+            du -k /tmp/gamma4/DSC-49775 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'DSC-49775'
+  dotnet8-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/DSC-49775 2>/dev/null) <(sort -u /tmp/gamma4/DSC-49775 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  test_477:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Round Two Probe
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; locale -ck LC_NUMERIC | head -n 4; true ; } > /tmp/gamma4/beam-frozen-quick
+            du -k /tmp/gamma4/beam-frozen-quick | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'beam-frozen-quick'
+  validate-quick-integration-tests:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/beam-frozen-quick 2>/dev/null) <(sort -u /tmp/gamma4/beam-frozen-quick 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  tab-job-hinge:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Back off 200 seconds
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; touch "/tmp/spec.out" && chmod 640 "/tmp/spec.out" && stat -c %a "/tmp/spec.out"; true ; } > /tmp/gamma4/seed-64f
+            du -k /tmp/gamma4/seed-64f | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'seed-64f'
+  luna-verify:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/seed-64f 2>/dev/null) <(sort -u /tmp/gamma4/seed-64f 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  expect_graph_quick:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: restore billing records maybe
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ls /sys/class/net | sort | uniq -c | sort -rn; true ; } > /tmp/gamma4/sha_20a36aac8e166b89
+            du -k /tmp/gamma4/sha_20a36aac8e166b89 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'sha_20a36aac8e166b89'
+  omar-smoke:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/sha_20a36aac8e166b89 2>/dev/null) <(sort -u /tmp/gamma4/sha_20a36aac8e166b89 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  setProfileIRQ:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Label Loading Bay Double Stack
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cat /proc/cpuinfo | grep -h 'cpu cores' | nl; true ; } > /tmp/gamma4/NEUTRON_SOUTH_RASTER_GADGET
+            du -k /tmp/gamma4/NEUTRON_SOUTH_RASTER_GADGET | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'NEUTRON_SOUTH_RASTER_GADGET'
+  ensure-nightly-release-candidate:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/NEUTRON_SOUTH_RASTER_GADGET 2>/dev/null) <(sort -u /tmp/gamma4/NEUTRON_SOUTH_RASTER_GADGET 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  interfaceVal:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: T1 masking
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; head -n 5 /etc/os-release | sort; true ; } > /tmp/gamma4/REnDeRcLiEnTrIDGe
+            du -k /tmp/gamma4/REnDeRcLiEnTrIDGe | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'REnDeRcLiEnTrIDGe'
+  wen-smoke:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/REnDeRcLiEnTrIDGe 2>/dev/null) <(sort -u /tmp/gamma4/REnDeRcLiEnTrIDGe 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  theLantern:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Span 924c
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; date --date "2024-02-29" "+%H:%M"; true ; } > /tmp/gamma4/THUNDER_PARSER
+            du -k /tmp/gamma4/THUNDER_PARSER | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'THUNDER_PARSER'
+  blast-off:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/THUNDER_PARSER 2>/dev/null) <(sort -u /tmp/gamma4/THUNDER_PARSER 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  RIGHT_SESSION_TLS:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: HACK screenshot
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ln -sf /etc/passwd "/tmp/rank_login_20190716.log" && readlink "/tmp/rank_login_20190716.log"; true ; } > /tmp/gamma4/1641-PDF
+            du -k /tmp/gamma4/1641-PDF | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '1641-PDF'
+  PROD_DEPLOY_6:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/1641-PDF 2>/dev/null) <(sort -u /tmp/gamma4/1641-PDF 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  ShallowCommentLoader:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Advance to seed data
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; date -d 'now + 90 minutes' '+%b %Y'; true ; } > /tmp/gamma4/sample_049
+            du -k /tmp/gamma4/sample_049 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'sample_049'
+  titan2-rev:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/sample_049 2>/dev/null) <(sort -u /tmp/gamma4/sample_049 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  undoRetreive:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Execute the fragile item shipping procedure
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; printf '%d\n' 7 72 439 484 386 200 305 | sort -n | uniq; true ; } > /tmp/gamma4/efa463
+            du -k /tmp/gamma4/efa463 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'efa463'
+  jess-ci:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/efa463 2>/dev/null) <(sort -u /tmp/gamma4/efa463 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  panelShouldVisit:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: TASK 5C57
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cp /etc/shells /tmp/labLibraryOwl.conf && sed -i.orig '/^#/d' /tmp/labLibraryOwl.conf && tail -n2 /tmp/labLibraryOwl.conf; true ; } > /tmp/gamma4/cedar
+            du -k /tmp/gamma4/cedar | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'cedar'
+  validate-production-docker-image:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/cedar 2>/dev/null) <(sort -u /tmp/gamma4/cedar 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  krxhud1ws1km:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Fail Over Webhooks Phase
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cat /proc/mounts | grep -w --color=always "tmpfs" | wc -l; true ; } > /tmp/gamma4/sha_fdb7957
+            du -k /tmp/gamma4/sha_fdb7957 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'sha_fdb7957'
+  node20-lint:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/sha_fdb7957 2>/dev/null) <(sort -u /tmp/gamma4/sha_fdb7957 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  sqrt-19:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Final Sweep Of The Vendor
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; mkdir -p "${TMPDIR:-/tmp}/statsWater_2023_07_27" && cd "${TMPDIR:-/tmp}/statsWater_2023_07_27" && touch white green black && ls && cd - >/dev/null; true ; } > /tmp/gamma4/0e665bdde4
+            du -k /tmp/gamma4/0e665bdde4 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '0e665bdde4'
+  depoly:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/0e665bdde4 2>/dev/null) <(sort -u /tmp/gamma4/0e665bdde4 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  TotalGlobalFastCheckout:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: P1
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; grep -H -s -m3 -A2 "PATH" /etc/profile | head -n 5; true ; } > /tmp/gamma4/temp3cf
+            du -k /tmp/gamma4/temp3cf | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'temp3cf'
+  hyperion-final:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/temp3cf 2>/dev/null) <(sort -u /tmp/gamma4/temp3cf 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  evt_signal_remove:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Taipei thank vendor
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; printf %s "it is raining" | md5sum | awk '{print $1}'; true ; } > /tmp/gamma4/build-v1.8.13
+            du -k /tmp/gamma4/build-v1.8.13 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'build-v1.8.13'
+  Prepare_Tests7:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/build-v1.8.13 2>/dev/null) <(sort -u /tmp/gamma4/build-v1.8.13 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  xY9:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: L4 double checking integration suite
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ls /usr/bin | tac | fmt -w 41; true ; } > /tmp/gamma4/AGENT
+            du -k /tmp/gamma4/AGENT | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'AGENT'
+  luna-build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/AGENT 2>/dev/null) <(sort -u /tmp/gamma4/AGENT 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  OSCursor:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: dry incubator last
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cat /etc/shells | sort -u | grep "^/" | head -n20; true ; } > /tmp/gamma4/GIF
+            du -k /tmp/gamma4/GIF | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'GIF'
+  aug13-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/GIF 2>/dev/null) <(sort -u /tmp/gamma4/GIF 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  Ghjkjklghjkjkl:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Transcode Scope Subset
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; grep -B 2 tty /etc/group | cut -d: -f1; true ; } > /tmp/gamma4/8123b
+            du -k /tmp/gamma4/8123b | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '8123b'
+  hyperion-rev:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/8123b 2>/dev/null) <(sort -u /tmp/gamma4/8123b 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  adapter_ref:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: optimize slow query log last
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; exec 3>/tmp/media.tmp; echo hello >&3; exec 3>&-; cat /tmp/media.tmp; true ; } > /tmp/gamma4/kappa.parser.pulse
+            du -k /tmp/gamma4/kappa.parser.pulse | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'kappa.parser.pulse'
+  break-prod:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/kappa.parser.pulse 2>/dev/null) <(sort -u /tmp/gamma4/kappa.parser.pulse 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  purple-hex:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: shuffle HELP
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; echo "buy more coffee" | tee -a "/tmp/station-drive.note" >/dev/null && wc -l "/tmp/station-drive.note"; true ; } > /tmp/gamma4/worker-frozen-nickel
+            du -k /tmp/gamma4/worker-frozen-nickel | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'worker-frozen-nickel'
+  build-staging-docker-image:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/worker-frozen-nickel 2>/dev/null) <(sort -u /tmp/gamma4/worker-frozen-nickel 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  posT:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Op 014 silver layer validation
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; sha224sum /etc/profile; true ; } > /tmp/gamma4/20210916_073502
+            du -k /tmp/gamma4/20210916_073502 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '20210916_073502'
+  rust-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/20210916_073502 2>/dev/null) <(sort -u /tmp/gamma4/20210916_073502 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  Timer-Local:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Lock the workers in parallel
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; pr -3 -t /etc/shells | head -n5; true ; } > /tmp/gamma4/crc_c689cd
+            du -k /tmp/gamma4/crc_c689cd | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'crc_c689cd'
+  v8-ga:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/crc_c689cd 2>/dev/null) <(sort -u /tmp/gamma4/crc_c689cd 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  THT2D:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Let us retire the API docs
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ls -l /dev|grep '^l'|wc -l; true ; } > /tmp/gamma4/2SM
+            du -k /tmp/gamma4/2SM | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '2SM'
+  build-nightly-release-candidate:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/2SM 2>/dev/null) <(sort -u /tmp/gamma4/2SM 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  megaEmailManifest:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Else kick off the batch window
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cat /proc/cpuinfo | \grep --count 'cpu MHz'; true ; } > /tmp/gamma4/rev-v1.10.32
+            du -k /tmp/gamma4/rev-v1.10.32 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'rev-v1.10.32'
+  bake-it:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/rev-v1.10.32 2>/dev/null) <(sort -u /tmp/gamma4/rev-v1.10.32 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  B3C035:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: proxy the NTP sync or ELSE
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; echo "release notes ready" | tee "/var/tmp/pitch_carrot.txt" /var/tmp/migration_handler_chart_2020_02_06.log >/dev/null && cat /var/tmp/migration_handler_chart_2020_02_06.log; true ; } > /tmp/gamma4/os-qa-img
+            du -k /tmp/gamma4/os-qa-img | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'os-qa-img'
+  Run_Prod2:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/os-qa-img 2>/dev/null) <(sort -u /tmp/gamma4/os-qa-img 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  myTest:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: All systems go archive the desk assignments
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; mkdir -p ${TMPDIR:-/tmp}/backup && cd ${TMPDIR:-/tmp}/backup && touch top addon street && ls && cd - >/dev/null; true ; } > /tmp/gamma4/220.248.182.254
+            du -k /tmp/gamma4/220.248.182.254 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '220.248.182.254'
+  build-staging-release-candidate:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/220.248.182.254 2>/dev/null) <(sort -u /tmp/gamma4/220.248.182.254 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  Var:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Initiative Ladder
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cut -c1-21 /etc/passwd | head -n 5; true ; } > /tmp/gamma4/5387d2dc034aecf4
+            du -k /tmp/gamma4/5387d2dc034aecf4 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '5387d2dc034aecf4'
+  callisto:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/5387d2dc034aecf4 2>/dev/null) <(sort -u /tmp/gamma4/5387d2dc034aecf4 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  pairBuildClientPawnAlpha:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: busy mirroring mesh routes
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; find "$HOME" -maxdepth 1 | sort -r | awk -F/ '{print NF-1}'; true ; } > /tmp/gamma4/Rusty
+            du -k /tmp/gamma4/Rusty | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'Rusty'
+  prometheus-final:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/Rusty 2>/dev/null) <(sort -u /tmp/gamma4/Rusty 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  deltaR:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Revoke the background checks by friday
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; printf 'host=localhost\nport=3685\nuser=tom\ndebug=true\n' >"/var/tmp/mel.txt" && sed -n "s/^user=//p" "/var/tmp/mel.txt"; true ; } > /tmp/gamma4/tmp-4d11c
+            du -k /tmp/gamma4/tmp-4d11c | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'tmp-4d11c'
+  jan9-canary:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/tmp-4d11c 2>/dev/null) <(sort -u /tmp/gamma4/tmp-4d11c 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+  mike-hotel:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: List The Raw Captures Task
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ls -GF ~/.bash* | tr '\n' ' '; true ; } > /tmp/gamma4/PDF
+            du -k /tmp/gamma4/PDF | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'PDF'
+  refactor-1403:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Read pre-run output
+          command: |
+            diff -q <(sort /tmp/gamma4/PDF 2>/dev/null) <(sort -u /tmp/gamma4/PDF 2>/dev/null) && echo "no dups" || echo "has dups"
+      - run:
+          name: Fetch main branch
+          command: git clone --depth 1 -q --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Load vendor code
+          command: tar -xj -f prod-images-main.tar.bz2
+      - run:
+          name: Finalize build
+          command: sleep 15
+      - run:
+          command: bash -c "./sync-app"
+
+  globeish:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Send the tab bar back to west
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; awk '{l[length($0)]++} END {for (n in l) print n, l[n]}' /etc/hosts | sort -rn | head --lines=5; true ; } > /tmp/gamma4/sha_fdb7957
+            du -k /tmp/gamma4/sha_fdb7957 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'sha_fdb7957'
+  glBUfqsp9sFh:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: DIM textures
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; tr -s ' \t' ' ' </etc/hosts|tac; true ; } > /tmp/gamma4/temp3cf
+            du -k /tmp/gamma4/temp3cf | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'temp3cf'
+  NO_STAGE:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Quarterly charge
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cut -f7 -d":" /etc/passwd | xargs -n1 dirname | sed 's|.*/||'; true ; } > /tmp/gamma4/AGENT
+            du -k /tmp/gamma4/AGENT | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'AGENT'
+  orchid-dst:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: shard prompt set FINAL
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ln -sf /etc/os-release '/tmp/CASTLE_BREAD_2.md' && ls -l '/tmp/CASTLE_BREAD_2.md'; true ; } > /tmp/gamma4/Rusty
+            du -k /tmp/gamma4/Rusty | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'Rusty'
+  alice_x:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Kindly sandbox the signing key
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; expr length "hello"; true ; } > /tmp/gamma4/220.248.182.254
+            du -k /tmp/gamma4/220.248.182.254 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '220.248.182.254'
+  Dismount-TextObject:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: ok ok
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cat /etc/os-release | head -n5 | sed 's/=.*//' | awk '{print toupper(substr($0,1,1)) substr($0,2)}'; true ; } > /tmp/gamma4/sample_049
+            du -k /tmp/gamma4/sample_049 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'sample_049'
+  theRyo:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Expanding Sidebar Bit 13
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; help cd | head -n2; true ; } > /tmp/gamma4/os-qa-img
+            du -k /tmp/gamma4/os-qa-img | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'os-qa-img'
+  yara_sunset:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: T1 spot check
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; printf '%s, ' raj pete frank; echo; true ; } > /tmp/gamma4/GIF
+            du -k /tmp/gamma4/GIF | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'GIF'
+  copyTimestampCurrent:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: g 64 seed level
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; yes 'done!' | head --lines=3; true ; } > /tmp/gamma4/THUNDER_PARSER
+            du -k /tmp/gamma4/THUNDER_PARSER | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'THUNDER_PARSER'
+  rdoCanvas8:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: I just mount the spare drives
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; sed -n 's/^ID=//p' /etc/os-release | sort -n | tail -n 3; true ; } > /tmp/gamma4/8123b
+            du -k /tmp/gamma4/8123b | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '8123b'
+  ImportNumRaw:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: df pdfs to bkt
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; printf '%s\n' 'CamelCaseName'| cat -A; true ; } > /tmp/gamma4/kappa.parser.pulse
+            du -k /tmp/gamma4/kappa.parser.pulse | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'kappa.parser.pulse'
+  runtimerc-bookworm:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Twice daily delete the upload folder
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; OUTPUT='toolscinema'; printf '%s\n' "${OUTPUT//o/}"; true ; } > /tmp/gamma4/beam-frozen-quick
+            du -k /tmp/gamma4/beam-frozen-quick | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'beam-frozen-quick'
+  ai:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: The vendor payments get billed twice
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; echo -n 'yay!' && echo; true ; } > /tmp/gamma4/worker-frozen-nickel
+            du -k /tmp/gamma4/worker-frozen-nickel | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'worker-frozen-nickel'
+  k-address:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Repair the connection pool in case of drift
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; for i in banana cherry plum; do printf '%s\n' "$i"; done; true ; } > /tmp/gamma4/build-v1.8.13
+            du -k /tmp/gamma4/build-v1.8.13 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'build-v1.8.13'
+  label-peek:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Project Winter Walnut
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; find /sys/class/net -maxdepth 2 -type f -size -10k -printf '%m %u %p\n' | wc -l; true ; } > /tmp/gamma4/20210916_073502
+            du -k /tmp/gamma4/20210916_073502 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '20210916_073502'
+  connectRectNonce:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Pack shrink wrap whenever
+          command: |
+            mkdir -p /tmp/gamma4
+            set +o pipefail 2>/dev/null; head -c 912097 /dev/urandom | tr -dc 'a-z' > /tmp/gamma4/DSC-49775; true
+            du -k /tmp/gamma4/DSC-49775 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'DSC-49775'
+  SVGScene5:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: dilution SKIP
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cat /proc/cpuinfo | grep processor | head --lines=2; true ; } > /tmp/gamma4/0e665bdde4
+            du -k /tmp/gamma4/0e665bdde4 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '0e665bdde4'
+  allChars:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Number Four Rollup
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; touch -d 'yesterday' "/tmp/valley.out" && date -r "/tmp/valley.out"; true ; } > /tmp/gamma4/REnDeRcLiEnTrIDGe
+            du -k /tmp/gamma4/REnDeRcLiEnTrIDGe | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'REnDeRcLiEnTrIDGe'
+  wip-avatar-fast:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Send the mutation score to bed
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ls -Qc /var/spool|sed -n '1~2p'; true ; } > /tmp/gamma4/efa463
+            du -k /tmp/gamma4/efa463 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'efa463'
+  v_idx:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Batch Seven Rerun
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; ls -tG /var/spool | sed -n '1~2p'; true ; } > /tmp/gamma4/PDF
+            du -k /tmp/gamma4/PDF | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'PDF'
+  hwv:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Leaderboard streamed at last
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; find /etc -maxdepth 2 -uid 0 -exec ls -1d {} + 2>/dev/null | sed 's|.*/||' | sort -u; true ; } > /tmp/gamma4/rev-v1.10.32
+            du -k /tmp/gamma4/rev-v1.10.32 | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - 'rev-v1.10.32'
+  SortedMigrationHandler:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/gamma4
+      - run:
+          name: Lap ten
+          command: |
+            mkdir -p /tmp/gamma4
+            { set +o pipefail 2>/dev/null; cp /etc/os-release ${TMPDIR:-/tmp}/category_0616.tmp && sed -i 's/"//g' ${TMPDIR:-/tmp}/category_0616.tmp && wc -l ${TMPDIR:-/tmp}/category_0616.tmp; true ; } > /tmp/gamma4/2SM
+            du -k /tmp/gamma4/2SM | awk '{printf "%sKB %s\n",$1,$2}'
+      - persist_to_workspace:
+          root: /tmp/gamma4
+          paths:
+            - '2SM'
+workflows:
+  workflow:
+    jobs:
+      - krxhud1ws1km
+      - globeish:
+          requires:
+            - krxhud1ws1km
+      - node20-lint:
+          requires:
+            - globeish
+      - TotalGlobalFastCheckout:
+          requires:
+            - globeish
+      - glBUfqsp9sFh:
+          requires:
+            - TotalGlobalFastCheckout
+      - hyperion-final:
+          requires:
+            - glBUfqsp9sFh
+      - xY9:
+          requires:
+            - glBUfqsp9sFh
+      - NO_STAGE:
+          requires:
+            - xY9
+      - luna-build:
+          requires:
+            - NO_STAGE
+      - pairBuildClientPawnAlpha:
+          requires:
+            - NO_STAGE
+      - orchid-dst:
+          requires:
+            - pairBuildClientPawnAlpha
+      - prometheus-final:
+          requires:
+            - orchid-dst
+      - myTest:
+          requires:
+            - orchid-dst
+      - alice_x:
+          requires:
+            - myTest
+      - build-staging-release-candidate:
+          requires:
+            - alice_x
+      - ShallowCommentLoader:
+          requires:
+            - alice_x
+      - Dismount-TextObject:
+          requires:
+            - ShallowCommentLoader
+      - titan2-rev:
+          requires:
+            - Dismount-TextObject
+      - expect_graph_quick
+      - omar-smoke:
+          requires:
+            - expect_graph_quick
+      - RIGHT_SESSION_TLS:
+          requires:
+            - expect_graph_quick
+      - PROD_DEPLOY_6:
+          requires:
+            - RIGHT_SESSION_TLS
+      - deltaR:
+          requires:
+            - RIGHT_SESSION_TLS
+      - jan9-canary:
+          requires:
+            - deltaR
+      - tab-job-hinge:
+          requires:
+            - deltaR
+      - luna-verify:
+          requires:
+            - tab-job-hinge
+      - setProfileIRQ:
+          requires:
+            - tab-job-hinge
+      - ensure-nightly-release-candidate:
+          requires:
+            - setProfileIRQ
+      - Var:
+          requires:
+            - setProfileIRQ
+      - callisto:
+          requires:
+            - Var
+      - panelShouldVisit:
+          requires:
+            - Var
+      - validate-production-docker-image:
+          requires:
+            - panelShouldVisit
+      - Timer-Local:
+          requires:
+            - panelShouldVisit
+      - v8-ga:
+          requires:
+            - Timer-Local
+      - B3C035
+      - theRyo:
+          requires:
+            - B3C035
+      - Run_Prod2:
+          requires:
+            - theRyo
+      - OSCursor:
+          requires:
+            - theRyo
+      - yara_sunset:
+          requires:
+            - OSCursor
+      - aug13-ship:
+          requires:
+            - yara_sunset
+      - theLantern:
+          requires:
+            - yara_sunset
+      - copyTimestampCurrent:
+          requires:
+            - theLantern
+      - blast-off:
+          requires:
+            - copyTimestampCurrent
+      - Ghjkjklghjkjkl:
+          requires:
+            - copyTimestampCurrent
+      - rdoCanvas8:
+          requires:
+            - Ghjkjklghjkjkl
+      - hyperion-rev:
+          requires:
+            - rdoCanvas8
+      - adapter_ref:
+          requires:
+            - rdoCanvas8
+      - ImportNumRaw:
+          requires:
+            - adapter_ref
+      - break-prod:
+          requires:
+            - ImportNumRaw
+      - test_477:
+          requires:
+            - ImportNumRaw
+      - runtimerc-bookworm:
+          requires:
+            - test_477
+      - validate-quick-integration-tests:
+          requires:
+            - runtimerc-bookworm
+      - purple-hex:
+          requires:
+            - runtimerc-bookworm
+      - ai:
+          requires:
+            - purple-hex
+      - build-staging-docker-image:
+          requires:
+            - ai
+      - evt_signal_remove:
+          requires:
+            - ai
+      - k-address:
+          requires:
+            - evt_signal_remove
+      - Prepare_Tests7:
+          requires:
+            - k-address
+      - posT:
+          requires:
+            - k-address
+      - label-peek:
+          requires:
+            - posT
+      - rust-ship:
+          requires:
+            - label-peek
+      - u_center:
+          requires:
+            - label-peek
+      - connectRectNonce:
+          requires:
+            - u_center
+      - dotnet8-ship:
+          requires:
+            - connectRectNonce
+      - sqrt-19:
+          requires:
+            - connectRectNonce
+      - SVGScene5:
+          requires:
+            - sqrt-19
+      - depoly:
+          requires:
+            - SVGScene5
+      - interfaceVal:
+          requires:
+            - SVGScene5
+      - allChars:
+          requires:
+            - interfaceVal
+      - wen-smoke:
+          requires:
+            - allChars
+      - undoRetreive
+      - wip-avatar-fast:
+          requires:
+            - undoRetreive
+      - jess-ci:
+          requires:
+            - wip-avatar-fast
+      - mike-hotel:
+          requires:
+            - wip-avatar-fast
+      - v_idx:
+          requires:
+            - mike-hotel
+      - refactor-1403:
+          requires:
+            - v_idx
+      - megaEmailManifest:
+          requires:
+            - v_idx
+      - hwv:
+          requires:
+            - megaEmailManifest
+      - bake-it:
+          requires:
+            - hwv
+      - THT2D:
+          requires:
+            - hwv
+      - SortedMigrationHandler:
+          requires:
+            - THT2D
+      - build-nightly-release-candidate:
+          requires:
+            - SortedMigrationHandler
